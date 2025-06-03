@@ -1,0 +1,6 @@
+cleaned_message,log_level,has_ip_address,has_file_path,has_error_code,has_url,has_email,original_length,cleaned_length,word_count,char_count,avg_word_length,contains_numbers,contains_uppercase,special_char_count,contains_error,contains_warning,contains_info,contains_debug,contains_critical,contains_fatal,contains_success,contains_failed,contains_timeout
+user logged in,INFO,False,False,True,False,False,39,14,3,14,4.0,False,False,0,False,False,False,False,False,False,False,False,False
+fetching user details,DEBUG,False,False,True,False,False,47,21,3,21,6.333333333333333,False,False,0,False,False,False,False,False,False,False,False,False
+user details fetched,INFO,False,False,True,False,False,45,20,3,20,6.0,False,False,0,False,False,False,False,False,False,False,False,False
+updating user details,DEBUG,False,False,True,False,False,47,21,3,21,6.333333333333333,False,False,0,False,False,False,False,False,False,False,False,False
+failed to update user details,ERROR,False,False,True,False,False,55,29,5,29,5.0,False,False,0,False,False,False,False,False,False,False,True,False

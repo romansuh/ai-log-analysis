@@ -1,0 +1,5 @@
+2024-08-11 12:22:59 INFO User logged in
+2024-08-11 12:23:01 DEBUG Fetching user details
+2024-08-11 12:23:03 INFO User details fetched
+2024-08-11 12:23:05 DEBUG Updating user details
+2024-08-11 12:23:07 ERROR Failed to update user details
