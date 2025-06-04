@@ -6,7 +6,7 @@ This script demonstrates basic usage of the LogFilterPipeline
 for extracting structured data from log messages.
 """
 
-from log_filtration_pipeline import LogParsingPipeline
+from log_parsing_pipeline import LogParsingPipeline
 
 def main():
     pipeline = LogParsingPipeline()
