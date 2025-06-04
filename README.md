@@ -1,57 +1,123 @@
-# Logs Filtration using AI - Coursework
+# Simple Log Filtration Pipeline
 
-## Project Overview
-This project implements an AI-based system for filtering and analyzing log data using machine learning techniques. The system can classify log entries, detect anomalies, and extract meaningful patterns from log files.
-
-## Project Structure
-```
-├── requirements.txt          # Python dependencies
-├── README.md                # Project documentation
-├── data/                    # Log data files
-├── src/                     # Source code
-│   ├── log_preprocessor.py  # Log data preprocessing
-│   ├── feature_extractor.py # Feature engineering
-│   ├── models/              # ML models
-│   └── utils/               # Utility functions
-├── notebooks/               # Jupyter notebooks for analysis
-├── results/                 # Model outputs and visualizations
-└── logs.txt                # Sample log data
-```
+A straightforward Python tool for parsing log files and extracting structured data. Separates metadata (timestamps, log levels, module names) from the main log message content into clean pandas DataFrames.
 
 ## Features
-- **Log Preprocessing**: Clean and normalize log entries
-- **Feature Extraction**: Extract meaningful features from log messages
-- **Anomaly Detection**: Identify unusual log patterns
-- **Log Classification**: Categorize logs by severity and type
-- **Visualization**: Generate insights through charts and graphs
 
-## Getting Started
+- **Automatic Pattern Detection**: Recognizes common log formats automatically
+- **Clean Data Extraction**: Separates timestamps, log levels, and messages into distinct columns
+- **Flexible Input**: Parse strings, lists, or files
+- **Custom Patterns**: Add your own regex patterns for specific log formats
+- **Pandas Integration**: Returns structured DataFrames ready for analysis
 
-### 1. Install Dependencies
-```bash
-pip install -r requirements.txt
-```
+## Quick Start
 
-### 2. Download NLTK Data (required for text processing)
 ```python
-import nltk
-nltk.download('punkt')
-nltk.download('stopwords')
+from log_filtration_pipeline import LogFilterPipeline
+
+# Initialize the pipeline
+pipeline = LogFilterPipeline()
+
+# Parse a log file
+df = pipeline.parse_log_file('your_logs.txt')
+
+# View structured data (metadata separated from message content)
+print(df[['parsed_timestamp', 'log_level', 'message']])
 ```
 
-### 3. Run the Main Analysis
+## Supported Log Formats
+
+### Simple Format
+```
+2024-08-11 12:22:59 INFO User logged in
+2024-08-11 12:23:01 DEBUG Fetching user details
+2024-08-11 12:23:03 ERROR Failed to connect to database
+```
+
+### Complex Format (with module/thread info)
+```
+2015-07-29 17:41:44,747 - INFO  [QuorumPeer[myid=1]:FastLeaderElection@774] - Notification time out: 3200
+2015-07-29 19:04:12,394 - INFO  [/10.10.34.11:3888:QuorumCnxManager$Listener@493] - Received connection request
+```
+
+## Usage Examples
+
+### Parse Individual Log Lines
+```python
+pipeline = LogFilterPipeline()
+log_line = "2024-08-11 15:30:45 WARN Connection timeout detected"
+parsed = pipeline.parse_log_line(log_line)
+
+print(f"Message: {parsed['message']}")
+print(f"Level: {parsed['log_level']}")
+print(f"Timestamp: {parsed['timestamp']}")
+```
+
+### Parse Multiple Logs
+```python
+logs = """
+2024-08-11 12:22:59 INFO User logged in
+2024-08-11 12:23:01 DEBUG Fetching user details
+2024-08-11 12:23:03 ERROR Failed to connect to database
+"""
+
+df = pipeline.parse_logs(logs)
+print(df[['parsed_timestamp', 'log_level', 'message']])
+```
+
+### Filter Parsed Data
+```python
+# Get only error and warning messages
+error_logs = df[df['log_level'].isin(['ERROR', 'WARN'])]
+
+# Extract clean message content (no metadata)
+clean_messages = df['message'].tolist()
+```
+
+### Add Custom Patterns
+```python
+# Add pattern for web server logs
+web_pattern = r'(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\s+\[([^\]]+)\]\s+"(\w+)\s+([^"]+)"\s+(\d+)'
+pipeline.add_custom_pattern(
+    name='web_server',
+    regex=web_pattern,
+    groups=['client_ip', 'timestamp', 'method', 'url', 'status_code']
+)
+
+# Parse with custom pattern
+web_log = '192.168.1.100 [29/Jul/2024:10:15:30] "GET /api/users" 200'
+parsed = pipeline.parse_log_line(web_log, pattern='web_server')
+```
+
+## Output Structure
+
+The pipeline outputs a pandas DataFrame with these columns (when available):
+
+- `parsed_timestamp`: Parsed datetime object
+- `timestamp`: Original timestamp string
+- `log_level`: Log level (INFO, ERROR, WARN, DEBUG, etc.)
+- `message`: Main log message content (cleaned of metadata)
+- `module_thread`: Module or thread information (for complex formats)
+- `raw_message`: Original unparsed log line
+
+## Requirements
+
+- pandas
+- Python 3.7+
+
+## Files
+
+- `log_filtration_pipeline.py`: Main pipeline implementation
+- `example_usage.py`: Usage examples and demonstrations
+- `logs.txt`: Sample simple log file
+- `Zookeeper_2k.log`: Sample complex log file
+
+## Running Examples
+
 ```bash
-python src/main.py
-```
+# Run the main pipeline demo
+python log_filtration_pipeline.py
 
-## Machine Learning Approaches
-1. **Text Processing**: NLP techniques for log message analysis
-2. **Classification Models**: Random Forest, SVM, Neural Networks
-3. **Clustering**: Unsupervised learning for pattern discovery
-4. **Anomaly Detection**: Isolation Forest, One-Class SVM
-
-## Evaluation Metrics
-- Accuracy, Precision, Recall, F1-Score
-- Confusion Matrix
-- ROC Curve and AUC
-- Silhouette Score for clustering 
+# Run detailed usage examples
+python example_usage.py
+``` 
