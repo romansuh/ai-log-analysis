@@ -2,4 +2,9 @@
 2024-08-11 12:23:01 DEBUG Fetching user id:78 details
 2024-08-11 12:23:03 INFO User id:778 details fetched
 2024-08-11 12:23:05 DEBUG Updating user details
-2024-08-11 12:23:07 ERROR Failed to update user details
+2024-08-11 12:23:05 DEBUG Updating user id: 78 details
+2024-08-11 12:23:05 DEBUG Updating user id: 79 details
+2024-08-11 12:23:07 ERROR Failed to update user detail id:79
+2024-08-11 12:23:07 ERROR Error on update user details id:778
+2024-08-11 12:23:07 ERROR error to update user details id:778
+Hi dude lets dance
