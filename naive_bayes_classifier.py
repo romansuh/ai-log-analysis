@@ -3,11 +3,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, accuracy_score
 import numpy as np
 import pandas as pd
-import logging
 from bert_vectorization_pipeline import process_logs_with_vectors
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+from datetime import datetime
+import io
 
 class LogNaiveBayesClassifier:
     def __init__(self):
@@ -25,23 +23,40 @@ class LogNaiveBayesClassifier:
         )
         
         # Train classifier
-        logger.info("Training Naive Bayes classifier...")
+        print("Training Naive Bayes classifier...")
         self.classifier.fit(X_train, y_train)
         
         # Evaluate
         y_pred = self.classifier.predict(X_test)
         accuracy = accuracy_score(y_test, y_pred)
-        report = classification_report(y_test, y_pred)
+        report = classification_report(y_test, y_pred, output_dict=True)
         
-        logger.info(f"Model Accuracy: {accuracy:.4f}")
-        logger.info("\nClassification Report:")
-        logger.info(report)
+        print(f"Model Accuracy: {accuracy:.4f}")
+        print("\nClassification Report:")
+        print(classification_report(y_test, y_pred))
         
-        return X_test, y_test
+        return X_test, y_test, y_pred, report
     
     def predict(self, vectors):
         """Predict clusters for new BERT vectors."""
         return self.classifier.predict(vectors)
+
+def save_classification_report_to_csv(report, accuracy):
+    """Save classification report metrics to a CSV file."""
+    # Convert report to DataFrame
+    report_df = pd.DataFrame(report).transpose()
+    
+    # Add accuracy to the DataFrame
+    report_df.loc['accuracy'] = {
+        'precision': accuracy,
+        'recall': accuracy,
+        'f1-score': accuracy,
+        'support': report_df['support'].sum()
+    }
+    
+    # Save to CSV
+    report_df.to_csv("classification_metrics.csv")
+    print("\nClassification metrics saved to classification_metrics.csv")
 
 def main():
     """Demonstrate Naive Bayes classification on log vectors."""
@@ -55,17 +70,17 @@ def main():
     
     # Initialize and train classifier
     classifier = LogNaiveBayesClassifier()
-    X_test, y_test = classifier.train(df)
+    X_test, y_test, y_pred, report = classifier.train(df)
     
-    # Make predictions on test set
-    y_pred = classifier.predict(X_test)
+    # Save classification report to CSV
+    save_classification_report_to_csv(report, accuracy_score(y_test, y_pred))
     
     # Show some example predictions with messages
-    logger.info("\nExample predictions:")
+    print("\nExample predictions:")
     test_indices = np.random.choice(len(X_test), min(5, len(X_test)), replace=False)
     for idx in test_indices:
-        logger.info(f"Message: {df['message'].iloc[idx]}")
-        logger.info(f"True cluster: {y_test[idx]}, Predicted cluster: {y_pred[idx]}\n")
+        print(f"Message: {df['message'].iloc[idx]}")
+        print(f"True cluster: {y_test[idx]}, Predicted cluster: {y_pred[idx]}\n")
 
 if __name__ == "__main__":
     try:
