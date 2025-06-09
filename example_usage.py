@@ -6,6 +6,7 @@ Simple example of log parsing and BERT vectorization
 from bert_vectorization_pipeline import BERTLogVectorizer, process_logs_with_vectors
 import numpy as np
 import pandas as pd
+from cluster_visualization import LogClusterVisualizer
 
 def create_similarity_matrix(df):
     """Create a dataframe with similarities between all pairs of log messages."""
@@ -48,29 +49,66 @@ def create_similarity_table(df):
         columns=[f'Msg_{i}' for i in range(n)]
     )
 
+def plot_clusters(embeddings, labels, title):
+    from sklearn.decomposition import PCA
+    import matplotlib.pyplot as plt
+    pca = PCA(n_components=2)
+    reduced = pca.fit_transform(embeddings)
+    plt.figure(figsize=(10, 8))
+    scatter = plt.scatter(reduced[:, 0], reduced[:, 1], c=labels, cmap='viridis', alpha=0.6)
+    plt.title(title)
+    plt.xlabel('PCA Component 1')
+    plt.ylabel('PCA Component 2')
+    plt.colorbar(scatter, label='Cluster')
+    plt.tight_layout()
+    plt.show()
+
 def main():
     """Demonstrate the clean BERT log vectorization pipeline."""
     
     print("Processing logs with BERT vectors...")
     
     # Option 1: One-liner for complete processing
-    df = process_logs_with_vectors('logs.txt')
+    df = process_logs_with_vectors('Zookeeper_2k.log')
     
     print(f"✓ Processed {len(df)} log entries")
     print(f"✓ Vector dimension: {len(df['bert_vector'].iloc[0])}")
     
     # Show sample results
-    print("\nProcessed logs:")
+    print("\nProcessed logs (first 10 entries):")
     display_cols = ['timestamp', 'log_level', 'message', 'cluster_id']
-    print(df[display_cols].to_string(index=True))
+    print(df[display_cols].head(10).to_string(index=True))
+    
+    # Visualize clusters (KMeans)
+    print("\nVisualizing clusters (KMeans on BERT embeddings)...")
+    embeddings = np.vstack(df['bert_vector'].values)
+    visualizer = LogClusterVisualizer(n_clusters=5)
+    kmeans_clusters = visualizer.visualize_clusters(embeddings)
+    
+    # Analyze KMeans clusters
+    print("\nKMeans Cluster Sizes:")
+    kmeans_cluster_sizes = pd.Series(kmeans_clusters).value_counts().sort_index()
+    for cluster, size in kmeans_cluster_sizes.items():
+        print(f"Cluster {cluster}: {size} messages ({size/len(df)*100:.1f}%)")
+    
+    # Visualize clusters (Drain cluster_id)
+    print("\nVisualizing clusters (Drain cluster_id on BERT embeddings)...")
+    cluster_ids = df['cluster_id'].astype('category').cat.codes.values
+    plot_clusters(embeddings, cluster_ids, title='Drain cluster_id on BERT embeddings')
+    
+    # Analyze Drain clusters
+    print("\nDrain Cluster Sizes:")
+    drain_cluster_sizes = df['cluster_id'].value_counts().sort_index()
+    for cluster, size in drain_cluster_sizes.items():
+        print(f"Cluster {cluster}: {size} messages ({size/len(df)*100:.1f}%)")
     
     # Create similarity matrix table
-    print("\n" + "="*80)
-    print("SIMILARITY MATRIX TABLE (all pairwise similarities)")
-    print("="*80)
+    # print("\n" + "="*80)
+    # print("SIMILARITY MATRIX TABLE (all pairwise similarities)")
+    # print("="*80)
     
     similarity_table = create_similarity_table(df)
-    print(similarity_table.round(3).to_string())
+    # print(similarity_table.head(10).round(3).to_string())
     
     similarity_df = create_similarity_matrix(df)
 
