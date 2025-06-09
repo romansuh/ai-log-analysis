@@ -7,6 +7,7 @@ from bert_vectorization_pipeline import BERTLogVectorizer, process_logs_with_vec
 import numpy as np
 import pandas as pd
 from cluster_visualization import LogClusterVisualizer
+import matplotlib.pyplot as plt
 
 def create_similarity_matrix(df):
     """Create a dataframe with similarities between all pairs of log messages."""
@@ -51,11 +52,14 @@ def create_similarity_table(df):
 
 def plot_clusters(embeddings, labels, title):
     from sklearn.decomposition import PCA
-    import matplotlib.pyplot as plt
     pca = PCA(n_components=2)
     reduced = pca.fit_transform(embeddings)
     plt.figure(figsize=(10, 8))
     scatter = plt.scatter(reduced[:, 0], reduced[:, 1], c=labels, cmap='viridis', alpha=0.6)
+
+    for i in range(0, len(reduced), 200):
+        plt.annotate(f'Msg_{i}', (reduced[i, 0], reduced[i, 1]))
+
     plt.title(title)
     plt.xlabel('PCA Component 1')
     plt.ylabel('PCA Component 2')
@@ -76,31 +80,31 @@ def main():
     
     # Show sample results
     print("\nProcessed logs (first 10 entries):")
-    display_cols = ['timestamp', 'log_level', 'message', 'cluster_id']
+    display_cols = ['timestamp', 'log_level', 'message', 'cluster_id', 'template']
     print(df[display_cols].head(10).to_string(index=True))
     
     # Visualize clusters (KMeans)
-    print("\nVisualizing clusters (KMeans on BERT embeddings)...")
-    embeddings = np.vstack(df['bert_vector'].values)
-    visualizer = LogClusterVisualizer(n_clusters=5)
-    kmeans_clusters = visualizer.visualize_clusters(embeddings)
+    # print("\nVisualizing clusters (KMeans on BERT embeddings)...")
+    # embeddings = np.vstack(df['bert_vector'].values)
+    # visualizer = LogClusterVisualizer(n_clusters=5)
+    # kmeans_clusters = visualizer.visualize_clusters(embeddings)
     
     # Analyze KMeans clusters
-    print("\nKMeans Cluster Sizes:")
-    kmeans_cluster_sizes = pd.Series(kmeans_clusters).value_counts().sort_index()
-    for cluster, size in kmeans_cluster_sizes.items():
-        print(f"Cluster {cluster}: {size} messages ({size/len(df)*100:.1f}%)")
+    # print("\nKMeans Cluster Sizes:")
+    # kmeans_cluster_sizes = pd.Series(kmeans_clusters).value_counts().sort_index()
+    # for cluster, size in kmeans_cluster_sizes.items():
+    #     print(f"Cluster {cluster}: {size} messages ({size/len(df)*100:.1f}%)")
     
     # Visualize clusters (Drain cluster_id)
-    print("\nVisualizing clusters (Drain cluster_id on BERT embeddings)...")
-    cluster_ids = df['cluster_id'].astype('category').cat.codes.values
-    plot_clusters(embeddings, cluster_ids, title='Drain cluster_id on BERT embeddings')
+    # print("\nVisualizing clusters (Drain cluster_id on BERT embeddings)...")
+    # cluster_ids = df['cluster_id'].astype('category').cat.codes.values
+    # plot_clusters(embeddings, cluster_ids, title='Drain cluster_id on BERT embeddings')
     
     # Analyze Drain clusters
-    print("\nDrain Cluster Sizes:")
-    drain_cluster_sizes = df['cluster_id'].value_counts().sort_index()
-    for cluster, size in drain_cluster_sizes.items():
-        print(f"Cluster {cluster}: {size} messages ({size/len(df)*100:.1f}%)")
+    # print("\nDrain Cluster Sizes:")
+    # drain_cluster_sizes = df['cluster_id'].value_counts().sort_index()
+    # for cluster, size in drain_cluster_sizes.items():
+    #     print(f"Cluster {cluster}: {size} messages ({size/len(df)*100:.1f}%)")
     
     # Create similarity matrix table
     # print("\n" + "="*80)
@@ -111,7 +115,17 @@ def main():
     # print(similarity_table.head(10).round(3).to_string())
     
     similarity_df = create_similarity_matrix(df)
-
+    
+    # Save processed data to CSV
+    # output_file = 'processed_logs.csv'
+    # df[display_cols].to_csv(output_file, index=False)
+    # print(f"\nProcessed data has been saved to {output_file}")
+    
+    # Save similarity matrix to CSV
+    # similarity_file = 'similarity_matrix.csv'
+    # similarity_df.to_csv(similarity_file)
+    # print(f"Similarity matrix has been saved to {similarity_file}")
+    
     # Find most and least similar pairs
     most_similar = similarity_df.loc[similarity_df['similarity'].idxmax()]
     least_similar = similarity_df.loc[similarity_df['similarity'].idxmin()]
@@ -119,15 +133,16 @@ def main():
     print(f"\n🔥 Most similar pair: Msg_{most_similar['msg_1']} ↔ Msg_{most_similar['msg_2']} ({most_similar['similarity']:.3f})")
     print(f"❄️  Least similar pair: Msg_{least_similar['msg_1']} ↔ Msg_{least_similar['msg_2']} ({least_similar['similarity']:.3f})")
     
-    return similarity_df, similarity_table
+    # return similarity_df, similarity_table
 
 if __name__ == "__main__":
     try:
-        similarity_df, similarity_table = main()
+        main()
+        # similarity_df, similarity_table = main()
         
-        print(f"\n📊 Tables created:")
-        print(f"   - Pairwise similarities: {similarity_df.shape}")
-        print(f"   - Similarity matrix: {similarity_table.shape}")
+        # print(f"\n📊 Tables created:")
+        # print(f"   - Pairwise similarities: {similarity_df.shape}")
+        # print(f"   - Similarity matrix: {similarity_table.shape}")
         
     except FileNotFoundError:
         print("Error: logs.txt not found")

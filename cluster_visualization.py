@@ -27,7 +27,7 @@ class LogClusterVisualizer:
         scatter = plt.scatter(reduced[:, 0], reduced[:, 1], c=clusters, cmap='viridis', alpha=0.6)
         
         # Add some sample messages as annotations (every 20th point to avoid overcrowding)
-        for i in range(0, len(reduced), 20):
+        for i in range(0, len(reduced), 200):
             plt.annotate(f'Msg_{i}', (reduced[i, 0], reduced[i, 1]))
         
         plt.title('Log Message Clusters (KMeans on BERT embeddings)')
