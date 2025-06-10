@@ -87,6 +87,6 @@ results/*.html
 
 # Temporary test files
 test_*.temp
-temp_*
+temp_* 
 
 .coursor

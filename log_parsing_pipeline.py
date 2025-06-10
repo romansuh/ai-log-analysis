@@ -73,10 +73,10 @@ class LogParsingPipeline:
                 preprocessed = self._preprocess_message(parsed['message'])
                 result = self.template_miner.add_log_message(preprocessed)
                 parsed['template'] = result.get('template_mined', parsed['message'])
-                parsed['cluster_id'] = result.get('cluster_id')
+                parsed['Drain_cluster_id'] = result.get('cluster_id')
             else:
                 parsed['template'] = None
-                parsed['cluster_id'] = None
+                parsed['Drain_cluster_id'] = None
             
             parsed_logs.append(parsed)
         
