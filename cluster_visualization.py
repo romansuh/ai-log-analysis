@@ -1,6 +1,7 @@
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import normalize
+from sklearn.metrics import silhouette_score
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -28,7 +29,13 @@ class LogClusterVisualizer:
         """
         # Normalize vectors to ensure cosine similarity
         normalized_vectors = normalize(embeddings)
-        return self.kmeans.fit_predict(normalized_vectors)
+        clusters = self.kmeans.fit_predict(normalized_vectors)
+        
+        # Calculate and print silhouette score
+        silhouette_avg = silhouette_score(normalized_vectors, clusters)
+        print(f"Silhouette Score for {self.n_clusters} clusters: {silhouette_avg:.3f}")
+        
+        return clusters
         
     def visualize_clusters(self, embeddings):
         """

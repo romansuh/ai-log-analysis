@@ -105,10 +105,10 @@ def main():
     # plot_clusters(np.vstack(df['bert_vector'].values), cluster_ids, title='Clusterization with Drain cluster_id')
     
     # Analyze Drain clusters
-    print("\nDrain Cluster Sizes:")
-    drain_cluster_sizes = df['Drain_cluster_id'].value_counts().sort_index()
-    for cluster, size in drain_cluster_sizes.items():
-        print(f"Cluster {cluster}: {size} messages ({size/len(df)*100:.1f}%)")
+    # print("\nDrain Cluster Sizes:")
+    # drain_cluster_sizes = df['Drain_cluster_id'].value_counts().sort_index()
+    # for cluster, size in drain_cluster_sizes.items():
+    #     print(f"Cluster {cluster}: {size} messages ({size/len(df)*100:.1f}%)")
     
     # Create similarity matrix table
     # print("\n" + "="*80)
